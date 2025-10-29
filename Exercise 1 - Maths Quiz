@@ -1,0 +1,71 @@
+import tkinter as tk
+from tkinter import messagebox
+import random
+
+class MathQuiz:
+    def __init__(carnage, root):
+        carnage.root = root
+        carnage.root.title("Exercise 1")
+        carnage.root.geometry("350x250")
+        carnage.menu()
+
+    def menu(carnage):
+        carnage.clear()
+        tk.Label(carnage.root, text="Select Difficulty", font=("Arial", 14, "bold")).pack(pady=10)
+        for text, lvl in [("Easy (1-digit)", 1), ("Moderate (2-digit)", 2), ("Advanced (4-digit)", 3)]:
+            tk.Button(carnage.root, text=text, width=20, command=lambda l=lvl: carnage.start(l)).pack(pady=5)
+
+    def start(carnage, lvl):
+        carnage.level, carnage.score, carnage.qnum = lvl, 0, 0
+        carnage.next_q()
+
+    def rand(carnage):
+        return random.randint(*{1:(1,9),2:(10,99),3:(1000,9999)}[carnage.level])
+
+    def next_q(carnage):
+        if carnage.qnum == 10: return carnage.results()
+        carnage.qnum += 1
+        carnage.n1, carnage.n2, carnage.op = carnage.rand(), carnage.rand(), random.choice(['+','-'])
+        carnage.correct = carnage.n1 + carnage.n2 if carnage.op == '+' else carnage.n1 - carnage.n2
+        carnage.attempt = 1
+        carnage.ask()
+
+    def ask(carnage):
+        carnage.clear()
+        tk.Label(carnage.root, text=f"Q{carnage.qnum}/10   Score:{carnage.score}", font=("Arial", 10)).pack()
+        tk.Label(carnage.root, text=f"{carnage.n1} {carnage.op} {carnage.n2} =", font=("Arial", 18, "bold")).pack(pady=15)
+        carnage.entry = tk.Entry(carnage.root, font=("Arial", 14), justify="center"); carnage.entry.pack()
+        tk.Button(carnage.root, text="Submit", command=carnage.check).pack(pady=10)
+
+    def check(carnage):
+        try: ans = int(carnage.entry.get())
+        except: return messagebox.showwarning("Error","Enter a number!")
+        if ans == carnage.correct:
+            carnage.score += 10 if carnage.attempt == 1 else 5
+            messagebox.showinfo("Correct","✅ Correct!")
+            carnage.next_q()
+        else:
+            if carnage.attempt == 1:
+                carnage.attempt += 1
+                messagebox.showwarning("Try Again","❌ Wrong. One more try!")
+                carnage.ask()
+            else:
+                messagebox.showinfo("Answer",f"❌ Wrong! Correct: {carnage.correct}")
+                carnage.next_q()
+
+    def results(carnage):
+        carnage.clear()
+        grade = "A+" if carnage.score>=90 else "A" if carnage.score>=80 else \
+                "B" if carnage.score>=70 else "C" if carnage.score>=60 else \
+                "D" if carnage.score>=50 else "F"
+        tk.Label(carnage.root, text="Quiz Complete!", font=("Arial",14,"bold")).pack(pady=10)
+        tk.Label(carnage.root, text=f"Score: {carnage.score}/100\nGrade: {grade}", font=("Arial",12)).pack(pady=10)
+        tk.Button(carnage.root, text="Play Again", command=carnage.menu).pack(pady=5)
+        tk.Button(carnage.root, text="Exit", command=carnage.root.quit).pack()
+
+    def clear(carnage):
+        for w in carnage.root.winfo_children(): w.destroy()
+
+root = tk.Tk()
+MathQuiz(root)
+root.mainloop()

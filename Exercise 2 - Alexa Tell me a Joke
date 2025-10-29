@@ -1,0 +1,31 @@
+import tkinter as tk, random
+
+def tell_joke():
+    global showing, setup, punch
+    if not showing:
+        setup, punch = random.choice(jokes)
+        l.config(text=setup + "?")
+        b.config(text="Show Punchline")
+        showing = True
+    else:
+        l.config(text=punch)
+        b.config(text="Tell me another Joke")
+        showing = False
+
+with open("anga.txt", "r", encoding="utf-8") as f:
+    jokes = [line.strip().split("?", 1) for line in f if "?" in line]
+
+carnage = tk.Tk()
+carnage.title("Exercise 2")
+carnage.geometry("400x200")
+
+l = tk.Label(carnage, text="Click below to hear a joke!", wraplength=350, font=("Arial", 12))
+l.pack(pady=20)
+
+b = tk.Button(carnage, text="Tell me a Joke", command=tell_joke)
+b.pack()
+
+tk.Button(carnage, text="Quit", command=carnage.quit).pack(pady=10)
+
+showing = False
+carnage.mainloop()
